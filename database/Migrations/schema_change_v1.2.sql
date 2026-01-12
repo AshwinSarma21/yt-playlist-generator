@@ -1,0 +1,8 @@
+
+ALTER TABLE playlists
+ALTER COLUMN topics TYPE TEXT[]
+USING string_to_array(topics, ',');
+
+ALTER TABLE videos
+ADD COLUMN IF NOT EXISTS view_count BIGINT DEFAULT 0,
+ADD COLUMN IF NOT EXISTS like_count BIGINT DEFAULT 0;
