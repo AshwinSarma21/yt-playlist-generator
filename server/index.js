@@ -26,17 +26,17 @@ app.get('/', (req, res) => {
 });
 
 function parseDuration(duration) {
-  if (!duration) return 0; 
-  
-  const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
-  
+    if (!duration) return 0;
 
-  if (!match) return 0; 
+    const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
 
-  const hours = (parseInt(match[1]) || 0);
-  const minutes = (parseInt(match[2]) || 0);
-  const seconds = (parseInt(match[3]) || 0);
-  return (hours * 3600) + (minutes * 60) + seconds;
+
+    if (!match) return 0;
+
+    const hours = (parseInt(match[1]) || 0);
+    const minutes = (parseInt(match[2]) || 0);
+    const seconds = (parseInt(match[3]) || 0);
+    return (hours * 3600) + (minutes * 60) + seconds;
 }
 
 const axios = require('axios');
@@ -46,7 +46,7 @@ async function searchYouTube(topic) {
     const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=${CONFIG.SEARCH_CACHE_SIZE}&q=${topic}&type=video&key=${apiKey}`;
     const searchResponse = await axios.get(searchUrl);
     if (searchResponse.data.items.length === 0) {
-        return []; 
+        return [];
     }
     // extract video ids
     const videoIds = searchResponse.data.items.map(item => item.id.videoId).join(',');
@@ -109,10 +109,10 @@ app.listen(PORT, () => {
 app.post('/api/generate-playlist', async (req, res) => {
 
     const rawTopics = req.body.topics;
-    
+
     if (rawTopics.length > CONFIG.MAX_TOPICS) {
-        return res.status(400).json({ 
-            error: `Too many topics! Max allowed is ${CONFIG.MAX_TOPICS}` 
+        return res.status(400).json({
+            error: `Too many topics! Max allowed is ${CONFIG.MAX_TOPICS}`
         });
     }
 
