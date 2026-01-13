@@ -9,6 +9,7 @@ const CONFIG = {
     SEARCH_CACHE_SIZE: 20,
     MINIMUM_DURATION: 180,
     VIDEOS_PER_TOPIC: 5,
+    MAX_TOPICS: 10
 
 }
 
@@ -25,11 +26,17 @@ app.get('/', (req, res) => {
 });
 
 function parseDuration(duration) {
-    const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
-    const hours = (parseInt(match[1]) || 0);
-    const minutes = (parseInt(match[2]) || 0);
-    const seconds = (parseInt(match[3]) || 0);
-    return (hours * 3600) + (minutes * 60) + seconds;
+  if (!duration) return 0; 
+  
+  const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+  
+
+  if (!match) return 0; 
+
+  const hours = (parseInt(match[1]) || 0);
+  const minutes = (parseInt(match[2]) || 0);
+  const seconds = (parseInt(match[3]) || 0);
+  return (hours * 3600) + (minutes * 60) + seconds;
 }
 
 const axios = require('axios');
@@ -102,6 +109,13 @@ app.listen(PORT, () => {
 app.post('/api/generate-playlist', async (req, res) => {
 
     const rawTopics = req.body.topics;
+    
+    if (rawTopics.length > CONFIG.MAX_TOPICS) {
+        return res.status(400).json({ 
+            error: `Too many topics! Max allowed is ${CONFIG.MAX_TOPICS}` 
+        });
+    }
+
     console.log("Received:", rawTopics);
 
     let upperTopics = [];
