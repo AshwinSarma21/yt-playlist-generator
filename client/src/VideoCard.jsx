@@ -20,7 +20,11 @@ function VideoCard({ video }) {
             </div>
 
             <div className="video-info">
-                <h3>{video.title}</h3>
+                <h3>
+                    <a href={`https://youtube.com/watch?v=${video.videoId}`} target="_blank" rel="noopener noreferrer">
+                        {video.title}
+                    </a>
+                </h3>
                 <p className="channel-name">{video.channelTitle}</p>
                 <div className="meta-data">
                     <span>Views {formatViews(video.viewCount)}</span>

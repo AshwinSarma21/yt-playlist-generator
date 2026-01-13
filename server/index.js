@@ -129,19 +129,18 @@ app.post('/api/generate-playlist', async (req, res) => {
         console.log("Fetching videos for:", cleanedTopics);
 
         const promiseList = cleanedTopics.map(topic => searchYouTube(topic));
-
         const results = await Promise.all(promiseList);
 
+        const allVideos = results.flat();
+        console.log(`Caching ${allVideos.length} videos to database...`);
+        await saveVideosToDB(allVideos);
+        console.log("Cache Complete");
+        const responseData = cleanedTopics.map((topic, index) => ({
+            topic: topic,
+            candidates: results[index] 
+        }));
 
-        const finalPlaylist = results.flat();
-
-
-        console.log(`Saving ${finalPlaylist.length} videos to database...`);
-        await saveVideosToDB(finalPlaylist);
-        console.log("Save complete!");
-
-
-        res.json(finalPlaylist);
+        res.json(responseData);
 
     } catch (error) {
         console.error("Error fetching from YouTube:", error.message);
