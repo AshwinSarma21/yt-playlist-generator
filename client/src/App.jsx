@@ -43,41 +43,42 @@ function App() {
       setLoading(false);
     }
   }
-  return (
+return (
     <>
-      <div>
+      {/* Added "app-container" for centering */}
+      <div className="app-container"> 
 
         <nav>
-          <div>
-            <a href="">
-              <img src={logoReact} alt="Homepage" />
-
+          <div className="nav-brand">
+            <a href="/">
+              <img src={logoReact} alt="Logo" className="logo" />
             </a>
-            <p> Youtube Playlist Creator </p>
+            <h1>Playlist Creator</h1>
           </div>
         </nav>
 
-        <div>
-          <h2>
-            Enter your topics and generate a playlist of videos
-          </h2>
+        <div className="header-section">
+          <h2>Enter your topics and generate a playlist of videos</h2>
           <p>
-            Enter a list of topics seperating with a new line or comma (if selected):<br />
+            Enter a list of topics seperating with a new line or comma (if selected):
           </p>
         </div>
-        <div className="controls">
-          <label>
-            <input
-              type="checkbox"
-              checked={splitByComma}
-              onChange={(e) => setSplitByComma(e.target.checked)}
-            />
-            Split by commas too?
-          </label>
-        </div>
-        <div>
+
+        <div className="input-group">
+          <div className="controls">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={splitByComma}
+                onChange={(e) => setSplitByComma(e.target.checked)}
+              />
+              <span>Split by commas too?</span>
+            </label>
+          </div>
+
           <textarea
-            placeholder='First Topic
+            className="topic-input"
+            placeholder="First Topic
 Second Topic
 Third Topic
 ...
@@ -89,25 +90,29 @@ First Topic, Second Topic
 Third topic
 Fourth Topic, Fifth Topic
 ..., 
-Last Topic'
-            rows={10}
-            onChange={(e) => setTextInput(e.target.value)}>
-          </textarea>
-          <button onClick={handleGenerate} disabled={loading}>{loading ? 'Generating...' : 'Generate Playlist'}</button>
+Last Topic"
+            rows={8}
+            onChange={(e) => setTextInput(e.target.value)}
+          ></textarea>
+          
+          <button 
+            className="generate-btn" 
+            onClick={handleGenerate} 
+            disabled={loading}
+          >
+            {loading ? 'Searching YouTube...' : 'Generate Playlist'}
+          </button>
         </div>
+
         <div className="results-section">
-          {videos.length > 0 && <h3>Your Playlist ({videos.length} topics)</h3>}
+          {videos.length > 0 && <h3 className="results-title">Your Playlist ({videos.length} videos)</h3>}
           
           <div className="video-list">
             {videos.map((group) => {
-              
               if (!group.candidates || group.candidates.length === 0) return null;
-
               const topVideo = group.candidates[0]; 
-
               return (
                 <VideoCard 
-                 
                   key={group.topic} 
                   video={topVideo} 
                 />
