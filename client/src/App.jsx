@@ -83,14 +83,13 @@ Second Topic
 Third Topic
 ...
 Last Topic
-
+=============================
 (Or if comma splitting)
-
-First Topic, Second Topic
-Third topic
+=============================
+First Topic,Second Topic
+Third Topic
 Fourth Topic, Fifth Topic
-..., 
-Last Topic"
+Sixth Topic,..., Last Topic"
             rows={8}
             onChange={(e) => setTextInput(e.target.value)}
           ></textarea>
