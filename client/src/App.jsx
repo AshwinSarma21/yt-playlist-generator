@@ -3,6 +3,13 @@ import logoReact from './assets/react.svg';
 import VideoCard from './VideoCard';
 import './App.css';
 
+const formatTotalTime = (totalSeconds) => {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+};
+
 function App() {
   const [textInput, setTextInput] = useState("");
   const [videos, setVideos] = useState([]);
@@ -30,7 +37,7 @@ function App() {
 
       if (!response.ok) {
         alert(data.error || "Something went wrong");
-        return; 
+        return;
       }
 
       const data = await response.json();
@@ -42,11 +49,16 @@ function App() {
     } finally {
       setLoading(false);
     }
+
   }
-return (
+  const totalSeconds = videos.reduce((acc, group) => {
+    if (!group.candidates || group.candidates.length === 0) return acc;
+    return acc + group.candidates[0].durationSeconds;
+  }, 0);
+  return (
     <>
-      {/* Added "app-container" for centering */}
-      <div className="app-container"> 
+
+      <div className="app-container">
 
         <nav>
           <div className="nav-brand">
@@ -93,10 +105,10 @@ Sixth Topic,..., Last Topic"
             rows={8}
             onChange={(e) => setTextInput(e.target.value)}
           ></textarea>
-          
-          <button 
-            className="generate-btn" 
-            onClick={handleGenerate} 
+
+          <button
+            className="generate-btn"
+            onClick={handleGenerate}
             disabled={loading}
           >
             {loading ? 'Searching YouTube...' : 'Generate Playlist'}
@@ -104,20 +116,44 @@ Sixth Topic,..., Last Topic"
         </div>
 
         <div className="results-section">
-          {videos.length > 0 && <h3 className="results-title">Your Playlist ({videos.length} videos)</h3>}
-          
-          <div className="video-list">
-            {videos.map((group) => {
-              if (!group.candidates || group.candidates.length === 0) return null;
-              const topVideo = group.candidates[0]; 
-              return (
-                <VideoCard 
-                  key={group.topic} 
-                  video={topVideo} 
-                />
-              );
-            })}
-          </div>
+          {videos.length > 0 && (
+            <>
+              <div className="playlist-header">
+                <h3 className="results-title">Your Playlist ({videos.length} videos)</h3>
+
+                <div className="stats-bar">
+                  <div className="stat-item main-stat">
+                    <span className="label">Total Time:</span>
+                    <span className="value">{formatTotalTime(totalSeconds)}</span>
+                  </div>
+
+                  <div className="speed-stats">
+                    <div className="stat-item" title="Save time by watching faster!">
+                      <span className="label">1.5x</span>
+                      <span className="value">{formatTotalTime(totalSeconds / 1.5)}</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="label">2.0x</span>
+                      <span className="value">{formatTotalTime(totalSeconds / 2)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="video-list">
+                {videos.map((group) => {
+                  if (!group.candidates || group.candidates.length === 0) return null;
+                  const topVideo = group.candidates[0];
+                  return (
+                    <VideoCard
+                      key={group.topic}
+                      video={topVideo}
+                    />
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </>
