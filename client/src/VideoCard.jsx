@@ -11,7 +11,16 @@ const formatViews = (num) => {
     return num;
 };
 
-function VideoCard({ video }) {
+function VideoCard({
+    topicLabel,
+    video,
+    currentIndex,
+    totalCandidates,
+    isLocked,
+    onNext,
+    onPrevious,
+    onToggleLock,
+}) {
     return (
         <div className="video-card">
             <div className="thumbnail-container">
@@ -20,6 +29,18 @@ function VideoCard({ video }) {
             </div>
 
             <div className="video-info">
+                <div className="video-card-header">
+                    <div className="topic-pill">Topic: {topicLabel}</div>
+                    <div className="card-state-row">
+                        <span className="selection-count">
+                            {currentIndex + 1} of {totalCandidates}
+                        </span>
+                        <button className={`lock-btn ${isLocked ? 'locked' : ''}`} onClick={onToggleLock}>
+                            {isLocked ? 'Locked' : 'Unlocked'}
+                        </button>
+                    </div>
+                </div>
+
                 <h3>
                     <a href={`https://youtube.com/watch?v=${video.videoId}`} target="_blank" rel="noopener noreferrer">
                         {video.title}
@@ -29,6 +50,15 @@ function VideoCard({ video }) {
                 <div className="meta-data">
                     <span>Views {formatViews(video.viewCount)}</span>
                     <span>Likes {formatViews(video.likeCount)}</span>
+                </div>
+
+                <div className="card-controls">
+                    <button className="nav-btn" onClick={onPrevious} disabled={isLocked}>
+                        Previous
+                    </button>
+                    <button className="nav-btn" onClick={onNext} disabled={isLocked}>
+                        Next
+                    </button>
                 </div>
             </div>
         </div>

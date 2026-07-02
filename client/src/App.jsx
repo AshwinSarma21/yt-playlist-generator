@@ -11,6 +11,23 @@ const formatTotalTime = (totalSeconds) => {
   return `${minutes}m`;
 };
 
+const formatTopicLabel = (topic) => {
+  return topic
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
+const normalizeVideos = (groups) => {
+  return groups.map((group) => ({
+    ...group,
+    selectedIndex: 0,
+    isLocked: false,
+  }));
+};
+
 
 // main app function 
 function App() {
@@ -45,7 +62,7 @@ function App() {
       } // if backend sends error report error
 
       const data = await response.json();
-      setVideos(data);
+      setVideos(normalizeVideos(data));
       console.log("Server response:", data); // if response wasn't error set the data to setVideos, then print the data
 
     } catch (error) {
@@ -56,14 +73,51 @@ function App() {
 
   }
 
+  const updateVideoGroup = (groupIndex, updater) => {
+    setVideos((currentVideos) =>
+      currentVideos.map((group, index) => {
+        if (index !== groupIndex) return group;
+        return updater(group);
+      })
+    );
+  };
+
+  const handleNextVideo = (groupIndex) => {
+    updateVideoGroup(groupIndex, (group) => {
+      if (group.isLocked || !group.candidates?.length) return group;
+      return {
+        ...group,
+        selectedIndex: (group.selectedIndex + 1) % group.candidates.length,
+      };
+    });
+  };
+
+  const handlePreviousVideo = (groupIndex) => {
+    updateVideoGroup(groupIndex, (group) => {
+      if (group.isLocked || !group.candidates?.length) return group;
+      const nextIndex = (group.selectedIndex - 1 + group.candidates.length) % group.candidates.length;
+      return {
+        ...group,
+        selectedIndex: nextIndex,
+      };
+    });
+  };
+
+  const handleToggleLock = (groupIndex) => {
+    updateVideoGroup(groupIndex, (group) => ({
+      ...group,
+      isLocked: !group.isLocked,
+    }));
+  };
+
   const totalSeconds = videos.reduce((acc, group) => {  //return the total length of all the videos selected in the playlist
     if (!group.candidates || group.candidates.length === 0) return acc;
-    return acc + group.candidates[0].durationSeconds;
+    const selectedVideo = group.candidates[group.selectedIndex] || group.candidates[0];
+    return acc + selectedVideo.durationSeconds;
   }, 0);
   
   return ( //html
     <>
-
       <div className="app-container">
 
         <nav>
@@ -147,13 +201,20 @@ Sixth Topic,..., Last Topic"
               </div>
 
               <div className="video-list"> 
-                {videos.map((group) => {
+                {videos.map((group, index) => {
                   if (!group.candidates || group.candidates.length === 0) return null;
-                  const topVideo = group.candidates[0];
+                  const selectedVideo = group.candidates[group.selectedIndex] || group.candidates[0];
                   return (
                     <VideoCard
                       key={group.topic}
-                      video={topVideo}
+                      topicLabel={formatTopicLabel(group.topic)}
+                      video={selectedVideo}
+                      currentIndex={group.selectedIndex}
+                      totalCandidates={group.candidates.length}
+                      isLocked={group.isLocked}
+                      onNext={() => handleNextVideo(index)}
+                      onPrevious={() => handlePreviousVideo(index)}
+                      onToggleLock={() => handleToggleLock(index)}
                     />
                   );
                 })}
