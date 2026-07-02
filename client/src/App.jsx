@@ -3,6 +3,7 @@ import logoReact from './assets/react.svg';
 import VideoCard from './VideoCard';
 import './App.css';
 
+//covert seconds to a readable time
 const formatTotalTime = (totalSeconds) => {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -10,21 +11,24 @@ const formatTotalTime = (totalSeconds) => {
   return `${minutes}m`;
 };
 
-function App() {
-  const [textInput, setTextInput] = useState("");
-  const [videos, setVideos] = useState([]);
-  const [splitByComma, setSplitByComma] = useState(true);
-  const [loading, setLoading] = useState(false);
 
-  async function handleGenerate() {
-    setLoading(true);
+// main app function 
+function App() {
+  const [textInput, setTextInput] = useState(""); //for handling user text input
+  const [videos, setVideos] = useState([]); // to handle videos retreived from the back end
+  const [splitByComma, setSplitByComma] = useState(true);//sanitizing user text input
+  const [loading, setLoading] = useState(false); //to handle loading of the generate button 
+
+  async function handleGenerate() { //handles the generation of videos
+    setLoading(true); //sets button to loading
     try {
       const splitPattern = splitByComma ? /[,\n]+/ : /\n+/;
       const topicsArray = textInput
         .split(splitPattern)
         .map(topic => topic.trim())
         .filter(topic => topic !== "");
-      console.log(topicsArray);
+      console.log(topicsArray);   // splits user input into individual topics by new lines or commas 
+      // stores each topic as an item in an array
 
       const response = await fetch('http://localhost:3000/api/generate-playlist', {
         method: 'POST',
@@ -32,30 +36,32 @@ function App() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ topics: topicsArray }),
-      });
+      }); //sends list of topics to backend as a JSON using POST
 
 
       if (!response.ok) {
         alert(data.error || "Something went wrong");
         return;
-      }
+      } // if backend sends error report error
 
       const data = await response.json();
       setVideos(data);
-      console.log("Server response:", data);
+      console.log("Server response:", data); // if response wasn't error set the data to setVideos, then print the data
 
     } catch (error) {
-      console.error("Error sending data:", error);
+      console.error("Error sending data:", error); // if error in sending data report error
     } finally {
-      setLoading(false);
+      setLoading(false); // once it is all done release the button from loading 
     }
 
   }
-  const totalSeconds = videos.reduce((acc, group) => {
+
+  const totalSeconds = videos.reduce((acc, group) => {  //return the total length of all the videos selected in the playlist
     if (!group.candidates || group.candidates.length === 0) return acc;
     return acc + group.candidates[0].durationSeconds;
   }, 0);
-  return (
+  
+  return ( //html
     <>
 
       <div className="app-container">
@@ -132,7 +138,7 @@ Sixth Topic,..., Last Topic"
                       <span className="label">1.5x</span>
                       <span className="value">{formatTotalTime(totalSeconds / 1.5)}</span>
                     </div>
-                    <div className="stat-item">
+                    <div className="stat-item" title="Save time by watching even faster!">
                       <span className="label">2.0x</span>
                       <span className="value">{formatTotalTime(totalSeconds / 2)}</span>
                     </div>
@@ -140,7 +146,7 @@ Sixth Topic,..., Last Topic"
                 </div>
               </div>
 
-              <div className="video-list">
+              <div className="video-list"> 
                 {videos.map((group) => {
                   if (!group.candidates || group.candidates.length === 0) return null;
                   const topVideo = group.candidates[0];
